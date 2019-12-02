@@ -5,7 +5,9 @@ import android.content.Context
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.view.animation.LinearInterpolator
+import android.widget.TextView
 import com.google.ar.sceneform.AnchorNode
 import com.google.ar.sceneform.Node
 import com.google.ar.sceneform.math.Quaternion
@@ -20,6 +22,8 @@ import kotlinx.coroutines.launch
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
+import com.google.ar.sceneform.rendering.ViewRenderable
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -75,23 +79,23 @@ class MainActivity : AppCompatActivity() {
         sunBase.localScale = Vector3(0.5f, 0.5f, 0.5f)
         sunBase.localPosition = Vector3(0f, 1f, 0f)
 
-        createPlanetNode(sunBase, solModel, Vector3(0f, 0f, 0f), Vector3(1f, 1f, 1f), null)
+        createPlanetNode(sunBase, solModel, Vector3(0f, 0f, 0f), Vector3(1f, 1f, 1f), "Sun", null)
 
-        createPlanetNode(sunBase, mercurioModel, Vector3(0.5f, 0f, 0f), Vector3(0.2f, 0.2f, 0.2f), 25000)
+        createPlanetNode(sunBase, mercurioModel, Vector3(0.5f, 0f, 0f), Vector3(0.2f, 0.2f, 0.2f), "Mercury", 25000)
 
-        createPlanetNode(sunBase, venusModel, Vector3(0.8f, 0f, 0.5f), Vector3(0.3f, 0.3f, 0.3f), 20000)
+        createPlanetNode(sunBase, venusModel, Vector3(0.8f, 0f, 0.5f), Vector3(0.3f, 0.3f, 0.3f), "Venus",20000)
 
-        createPlanetNode(sunBase, earthModel, Vector3(1.2f, 0f, 0f), Vector3(0.4f, 0.4f, 0.4f), 15000)
+        createPlanetNode(sunBase, earthModel, Vector3(1.2f, 0f, 0f), Vector3(0.4f, 0.4f, 0.4f), "Earth",15000)
 
-        createPlanetNode(sunBase, marsModel, Vector3(1.6f, 0f, 0f), Vector3(0.3f, 0.3f, 0.3f), 30000)
+        createPlanetNode(sunBase, marsModel, Vector3(1.6f, 0f, 0f), Vector3(0.3f, 0.3f, 0.3f), "Mars",30000)
 
-        createPlanetNode(sunBase, jupiterModel, Vector3(2.1f, 0f, 0f), Vector3(0.5f, 0.5f, 0.5f), 12000)
+        createPlanetNode(sunBase, jupiterModel, Vector3(2.1f, 0f, 0f), Vector3(0.5f, 0.5f, 0.5f), "Jupiter",12000)
 
-        createPlanetNode(sunBase, saturnModel, Vector3(2.8f, 0f, 0f), Vector3(0.5f, 0.5f, 0.5f), 27000)
+        createPlanetNode(sunBase, saturnModel, Vector3(2.8f, 0f, 0f), Vector3(0.5f, 0.5f, 0.5f), "Saturn",27000)
 
-        createPlanetNode(sunBase, uranusModel, Vector3(3.8f, 0f, 0f), Vector3(0.9f, 0.9f, 0.9f), 23000)
+        createPlanetNode(sunBase, uranusModel, Vector3(3.8f, 0f, 0f), Vector3(0.9f, 0.9f, 0.9f), "Uranus",23000)
 
-        createPlanetNode(sunBase, neptuneModel, Vector3(4.6f, 0f, 0f), Vector3(0.4f, 0.4f, 0.4f), 10000)
+        createPlanetNode(sunBase, neptuneModel, Vector3(4.6f, 0f, 0f), Vector3(0.4f, 0.4f, 0.4f), "Neptune",10000)
 
         return sunBase
     }
@@ -120,6 +124,7 @@ class MainActivity : AppCompatActivity() {
                                renderable: ModelRenderable?,
                                localPosition: Vector3,
                                localScale: Vector3,
+                               name: String,
                                aniSpeed: Long? = null
   ) {
 
@@ -137,6 +142,26 @@ class MainActivity : AppCompatActivity() {
         target = simpleAniNode
         duration = aniSpeed
       }.start()
+    }
+
+    val infoCardNode = Node()
+
+    ViewRenderable.builder()
+        .setView(this, R.layout.planet_info_card)
+        .build()
+        .thenAccept {
+            val nameTxtView = it.view.findViewById<TextView>(R.id.planet_name)
+            nameTxtView.text = name
+
+            infoCardNode.localPosition = Vector3(0f, 0.5f, 0f)
+            infoCardNode.renderable = it
+            infoCardNode.isEnabled  = false
+
+            sun.addChild(infoCardNode)
+        }
+
+    sun.setOnTapListener { hitTestResult, motionEvent ->
+        infoCardNode.isEnabled = !infoCardNode.isEnabled
     }
 
   }
